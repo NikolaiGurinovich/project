@@ -2,10 +2,7 @@ package com.example.project.model;
 
 import com.example.project.enums.Gender;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,22 +24,24 @@ import java.sql.Timestamp;
         @NotNull
         @Size(min = 1, max = 30)
         @Column(name = "user_name", unique = true)
-        private String username;
+        private String userName;
 
         @Min(1)
-        @Max(200)
+        @Max(120)
+        @NotNull
         @Column(name = "user_age")
-        private Integer user_age;
+        private Integer userAge;
 
-        //:TODO add filter to weight
+        @Positive
+        @NotNull
         @Column(name = "user_weight")
-        private Double user_weight;
+        private Double userWeight;
 
         @Column(name = "created")
         @Temporal(TemporalType.TIMESTAMP)
         private Timestamp created;
 
-        @Enumerated
+        @Enumerated(EnumType.STRING)
         @Column(name = "gender")
         private Gender gender;
 

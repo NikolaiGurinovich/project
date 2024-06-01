@@ -1,6 +1,9 @@
 package com.example.project.security.model;
 
+import com.example.project.security.enums.Roles;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -23,14 +26,17 @@ public class SecurityUser {
     @Column(name = "user_id")
     private Long userId;
 
-    //:TODO EMAIL
-    @Size(min = 10, max = 40)
+    @Email
     @NotNull
     @Column(name = "login")
-    private String login;
+    private String userLogin;
 
-    @Size(min = 5, max = 40)
+    @Size(min = 3)
     @NotNull
     @Column(name = "password")
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private Roles role;
 }

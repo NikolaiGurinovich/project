@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 @Entity(name = "l_user_group")
 public class LinkUserGroup {
     @Id
-    @SequenceGenerator(name = "lusergroupSeqGen", sequenceName = "l_user_group_id_seq", allocationSize = 1)
-    @GeneratedValue(generator = "lusergroupSeqGen")
+    @SequenceGenerator(name = "lUserGroupSeqGen", sequenceName = "l_user_group_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "lUserGroupSeqGen")
     private Long id;
 
     @NotNull
@@ -24,5 +24,5 @@ public class LinkUserGroup {
 
     @NotNull
     @Column(name = "group_id")
-    private Long group_id;
+    private Long groupId;
 }

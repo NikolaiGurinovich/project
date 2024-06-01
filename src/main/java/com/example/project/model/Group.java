@@ -8,11 +8,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
+
 @Component
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "group")
+@Entity(name = "groups")
 public class Group {
     @Id
     @SequenceGenerator(name = "groupSeqGen", sequenceName = "group_id_seq", allocationSize = 1)
@@ -23,4 +25,15 @@ public class Group {
     @Size(min = 1, max = 300)
     @Column(name = "group_name", unique = true)
     private String groupName;
+
+    @Column(name = "created")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Timestamp created;
+
+    @Column(name = "updated")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Timestamp updated;
+
+    @Column(name = "number_of_members")
+    private Long numberOfMembers;
 }
