@@ -1,10 +1,15 @@
 package com.example.project.service;
 
+import com.example.project.model.Followers;
 import com.example.project.model.User;
+import com.example.project.repository.FollowersRepository;
 import com.example.project.repository.UserRepository;
+import com.example.project.security.model.SecurityUser;
+import com.example.project.security.repository.UserSecurityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.Principal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,10 +18,14 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final UserSecurityRepository userSecurityRepository;
+    private final FollowersRepository followersRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserSecurityRepository userSecurityRepository, FollowersRepository followersRepository) {
         this.userRepository = userRepository;
+        this.userSecurityRepository = userSecurityRepository;
+        this.followersRepository = followersRepository;
     }
 
     public List<User> getAllUsers() {
@@ -63,5 +72,25 @@ public class UserService {
             return userFromDB.equals(updatedUser);
         }
         return false;
+    }
+
+    public Optional<User> getInfoAboutCurrentUser(String username){
+        Optional<SecurityUser> userSecurity = userSecurityRepository.findByUserLogin(username);
+        if (userSecurity.isEmpty()){
+            return Optional.empty();
+        }
+        return userRepository.findById(userSecurity.get().getUserId());
+    }
+
+    public Boolean subscribe(Principal principal, Long id) {
+        Optional<SecurityUser> userSecurity = userSecurityRepository.findByUserLogin(principal.getName());
+        if (userSecurity.isEmpty()){
+            return false;
+        }
+        Followers follow = new Followers();
+        follow.setUserId(id);
+        follow.setSubUserId(userSecurity.get().getUserId());
+        Followers savedFollow = followersRepository.save(follow);
+        return followersRepository.existsById(savedFollow.getId());
     }
 }

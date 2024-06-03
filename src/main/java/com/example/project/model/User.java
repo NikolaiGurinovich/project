@@ -48,7 +48,6 @@ import java.sql.Timestamp;
         @Column(name = "updated")
         @Temporal(TemporalType.TIMESTAMP)
         private Timestamp updated;
-
-
+        
     }
 

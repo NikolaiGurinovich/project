@@ -1,6 +1,8 @@
 package com.example.project.service;
 
+import com.example.project.model.User;
 import com.example.project.model.Workout;
+import com.example.project.model.dto.AddWorkoutDto;
 import com.example.project.repository.UserRepository;
 import com.example.project.repository.WorkoutRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,5 +78,21 @@ public class WorkoutService {
             return workoutFromDB.equals(updatedWorkout);
         }
         return false;
+    }
+
+    public Boolean addWorkoutFromUser(Long userId, AddWorkoutDto addWorkoutDto) {
+        Optional<User> userFromDBOptional = userRepository.findById(userId);
+        if (userFromDBOptional.isEmpty()){
+            return false;
+        }
+        Workout newWorkout = new Workout();
+        newWorkout.setWorkoutType(addWorkoutDto.getWorkoutType());
+        newWorkout.setWorkoutDistance(addWorkoutDto.getWorkoutDistance());
+        newWorkout.setWorkoutTime(addWorkoutDto.getWorkoutTime());
+        newWorkout.setUserId(userId);
+        newWorkout.setCreated(Timestamp.valueOf(LocalDateTime.now()));
+        newWorkout.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
+        Workout createdWorkout = workoutRepository.save(newWorkout);
+        return getWorkoutById(createdWorkout.getId()).isPresent();
     }
 }

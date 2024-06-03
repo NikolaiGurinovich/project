@@ -51,7 +51,7 @@ public class GroupService {
             Group groupFromDB = groupFromDBOptional.get();
             if (group.getGroupName() != null){
                 groupFromDB.setGroupName(group.getGroupName());
-            }
+            } else return false;
             groupFromDB.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
             Group updatedGroup = groupRepository.saveAndFlush(groupFromDB);
             return groupFromDB.equals(updatedGroup);

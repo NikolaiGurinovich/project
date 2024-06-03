@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,5 +60,31 @@ public class UserController {
     public ResponseEntity<HttpStatus> deleteUserById(@PathVariable("id") Long id) {
         log.info("start method deleteUserById in UserController");
         return new ResponseEntity<>(userService.deleteUserById(id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
+    }
+
+    @GetMapping("/info")
+    public ResponseEntity<User> getInfoAboutCurrentUser(Principal principal){
+        Optional<User> result = userService.getInfoAboutCurrentUser(principal.getName());
+        if (result.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result.get(), HttpStatus.OK);
+    }
+
+    @PostMapping("/subscribe/{id}")
+    public ResponseEntity<HttpStatus> subscribe(@PathVariable("id") Long id, Principal principal) {
+        log.info("start method subscribe in UserController");
+        Optional<User> subscriber = userService.getInfoAboutCurrentUser(principal.getName());
+        if (subscriber.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Optional<User> userToSubscribe = userService.getUserById(id);
+        if (userToSubscribe.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        if (subscriber.get().getId().equals(id)){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(userService.subscribe(principal, id) ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 }
