@@ -4,6 +4,7 @@ import com.example.project.model.Group;
 import com.example.project.model.User;
 import com.example.project.model.dto.CreateGroupByUserDto;
 import com.example.project.service.GroupService;
+import com.example.project.service.LUserGroupService;
 import com.example.project.service.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -24,11 +25,13 @@ public class GroupController {
 
     private final GroupService groupService;
     private final UserService userService;
+    private final LUserGroupService lUserGroupService;
 
     @Autowired
-    public GroupController(GroupService groupService, UserService userService) {
+    public GroupController(GroupService groupService, UserService userService, LUserGroupService lUserGroupService) {
         this.groupService = groupService;
         this.userService = userService;
+        this.lUserGroupService = lUserGroupService;
     }
 
     @GetMapping
@@ -79,5 +82,19 @@ public class GroupController {
         }
         return new  ResponseEntity<>(groupService.createGroupByUser(createGroupByUserDto, principal.getName())
                 ? HttpStatus.CREATED : HttpStatus.CONFLICT);
+    }
+
+    @PostMapping("/join/{id}")
+    public ResponseEntity<HttpStatus> joinGroup(@PathVariable("id") Long id, Principal principal) {
+        log.info("start method joinGroup in GroupController");
+        Optional<User> newMember = userService.getInfoAboutCurrentUser(principal.getName());
+        if (newMember.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Optional<Group> targetGroup = groupService.getGroupById(id);
+        if (targetGroup.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(lUserGroupService.joinGroup(id, newMember.get().getId()) ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 }

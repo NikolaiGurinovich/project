@@ -3,11 +3,11 @@ package com.example.project.service;
 import com.example.project.model.Group;
 import com.example.project.model.dto.CreateGroupByUserDto;
 import com.example.project.repository.GroupRepository;
-import com.example.project.repository.UserRepository;
 import com.example.project.security.enums.Roles;
 import com.example.project.security.repository.UserSecurityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -69,6 +69,7 @@ public class GroupService {
         return false;
     }
 
+    @Transactional
     public Boolean createGroupByUser (CreateGroupByUserDto createGroupByUserDto, String userLogin) {
         Group group = new Group();
         if (createGroupByUserDto.getGroupName() != null) {

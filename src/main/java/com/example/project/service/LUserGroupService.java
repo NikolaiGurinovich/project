@@ -6,6 +6,7 @@ import com.example.project.repository.LUserGroupRepository;
 import com.example.project.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,12 +16,14 @@ public class LUserGroupService {
     private final LUserGroupRepository lUserGroupRepository;
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
+    private final GroupService groupService;
 
     @Autowired
-    public LUserGroupService(LUserGroupRepository lUserGroupRepository, UserRepository userRepository, GroupRepository groupRepository) {
+    public LUserGroupService(LUserGroupRepository lUserGroupRepository, UserRepository userRepository, GroupRepository groupRepository, GroupService groupService) {
         this.lUserGroupRepository = lUserGroupRepository;
         this.userRepository = userRepository;
         this.groupRepository = groupRepository;
+        this.groupService = groupService;
     }
 
     public List<LinkUserGroup> getAllLinks() {
@@ -66,5 +69,16 @@ public class LUserGroupService {
             return linkFromDB.equals(updatedLink);
         }
         return false;
+    }
+
+    @Transactional
+    public Boolean joinGroup(Long groupID, Long userID) {
+        LinkUserGroup linkUserGroup = new LinkUserGroup();
+        linkUserGroup.setUserId(userID);
+        linkUserGroup.setGroupId(groupID);
+        groupService.getGroupById(groupID).get().setNumberOfMembers(groupService.getGroupById(groupID).
+                get().getNumberOfMembers() + 1);
+        LinkUserGroup savedLink = lUserGroupRepository.saveAndFlush(linkUserGroup);
+        return getLinkById(savedLink.getId()).isPresent();
     }
 }
