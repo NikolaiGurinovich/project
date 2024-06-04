@@ -36,4 +36,8 @@ public class Group {
 
     @Column(name = "number_of_members")
     private Long numberOfMembers;
+
+    @NotNull
+    @Column(name = "group_admin_id")
+    private Long groupAdminID;
 }

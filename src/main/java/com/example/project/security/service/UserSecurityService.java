@@ -8,7 +8,6 @@ import com.example.project.security.model.SecurityUser;
 import com.example.project.security.model.dto.AuthRequestDto;
 import com.example.project.security.model.dto.RegistrationDto;
 import com.example.project.security.repository.UserSecurityRepository;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

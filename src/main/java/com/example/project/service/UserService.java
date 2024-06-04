@@ -74,8 +74,8 @@ public class UserService {
         return false;
     }
 
-    public Optional<User> getInfoAboutCurrentUser(String username){
-        Optional<SecurityUser> userSecurity = userSecurityRepository.findByUserLogin(username);
+    public Optional<User> getInfoAboutCurrentUser(String userName){
+        Optional<SecurityUser> userSecurity = userSecurityRepository.findByUserLogin(userName);
         if (userSecurity.isEmpty()){
             return Optional.empty();
         }

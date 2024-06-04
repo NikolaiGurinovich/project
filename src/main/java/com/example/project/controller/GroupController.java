@@ -1,7 +1,10 @@
 package com.example.project.controller;
 
 import com.example.project.model.Group;
+import com.example.project.model.User;
+import com.example.project.model.dto.CreateGroupByUserDto;
 import com.example.project.service.GroupService;
+import com.example.project.service.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,10 +23,12 @@ import java.util.Optional;
 public class GroupController {
 
     private final GroupService groupService;
+    private final UserService userService;
 
     @Autowired
-    public GroupController(GroupService groupService) {
+    public GroupController(GroupService groupService, UserService userService) {
         this.groupService = groupService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -58,5 +64,20 @@ public class GroupController {
     public ResponseEntity<HttpStatus> deleteUserById(@PathVariable("id") Long id) {
         log.info("start method deleteGroupById in GroupController");
         return new ResponseEntity<>(groupService.deleteGroupById(id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<HttpStatus> createGroupByUser(@RequestBody @Valid CreateGroupByUserDto createGroupByUserDto
+            , BindingResult bindingResult, Principal principal) {
+        log.info("start method createGroupByUser in GroupController");
+        if (bindingResult.hasErrors()) {
+            log.error(bindingResult.getFieldError().getDefaultMessage());
+        }
+        Optional<User> creator = userService.getInfoAboutCurrentUser(principal.getName());
+        if (creator.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new  ResponseEntity<>(groupService.createGroupByUser(createGroupByUserDto, principal.getName())
+                ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 }
