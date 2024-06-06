@@ -2,6 +2,8 @@ package com.example.project.controller;
 
 import com.example.project.model.Likes;
 import com.example.project.service.LikesService;
+import com.example.project.service.UserService;
+import com.example.project.service.WorkoutService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +20,14 @@ import java.util.Optional;
 @RequestMapping("/likes")
 public class LikesController {
     private final LikesService likesService;
+    private final UserService userService;
+    private final WorkoutService workoutService;
 
     @Autowired
-    public LikesController(LikesService likesService) {
+    public LikesController(LikesService likesService, UserService userService, WorkoutService workoutService) {
         this.likesService = likesService;
+        this.userService = userService;
+        this.workoutService = workoutService;
     }
 
     @GetMapping
@@ -45,13 +51,31 @@ public class LikesController {
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }
+        if (checkBody(like)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(likesService.createLike(like) ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 
     @PutMapping
-    public ResponseEntity<HttpStatus> updateLike(@RequestBody Likes like) {
+    public ResponseEntity<HttpStatus> updateLike(@RequestBody @Valid Likes like) {
         log.info("start updateLike from LikesController");
+        if (checkBody(like)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(likesService.getLikeById(like.getId()).isEmpty()) {
+            log.error("like id not found ");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(likesService.updateLike(like) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
+    }
+
+    private boolean checkBody(@RequestBody Likes like) {
+        if(workoutService.getWorkoutById(like.getWorkoutId()).isEmpty()) {
+            log.error("workout id not found");
+            return true;
+        }
+        if (userService.getUserById(like.getUserId()).isEmpty()) {
+            log.error("user not found");
+            return true;
+        }
+        return false;
     }
 
     @DeleteMapping("/{id}")

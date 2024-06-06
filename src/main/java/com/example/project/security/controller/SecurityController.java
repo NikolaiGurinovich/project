@@ -34,6 +34,7 @@ public class SecurityController {
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }
+
         userSecurityService.registration(registrationDto);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

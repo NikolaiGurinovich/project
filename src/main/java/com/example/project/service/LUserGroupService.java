@@ -45,6 +45,9 @@ public class LUserGroupService {
 
     public Boolean createLink(LinkUserGroup linkUserGroup) {
         LinkUserGroup newLink = new LinkUserGroup();
+        if (lUserGroupRepository.existsAllByUserIdAndGroupId(linkUserGroup.getUserId(), linkUserGroup.getGroupId())) {
+            return false;
+        }
         if (userRepository.existsById(linkUserGroup.getUserId())) {
             newLink.setGroupId(linkUserGroup.getGroupId());
         } else return false;
@@ -58,6 +61,9 @@ public class LUserGroupService {
     public Boolean updateLink(LinkUserGroup linkUserGroup) {
         Optional<LinkUserGroup> linkFromDBOptional = lUserGroupRepository.findById(linkUserGroup.getId());
         if (linkFromDBOptional.isPresent()) {
+            if (lUserGroupRepository.existsAllByUserIdAndGroupId(linkUserGroup.getUserId(), linkUserGroup.getGroupId())) {
+                return false;
+            }
             LinkUserGroup linkFromDB = linkFromDBOptional.get();
             if (userRepository.existsById(linkUserGroup.getUserId())) {
                 linkFromDB.setGroupId(linkUserGroup.getGroupId());
@@ -73,12 +79,44 @@ public class LUserGroupService {
 
     @Transactional
     public Boolean joinGroup(Long groupID, Long userID) {
-        LinkUserGroup linkUserGroup = new LinkUserGroup();
-        linkUserGroup.setUserId(userID);
-        linkUserGroup.setGroupId(groupID);
+        if (lUserGroupRepository.existsAllByUserIdAndGroupId(userID, groupID)) {
+            return false;
+        }
+        LinkUserGroup newLink = new LinkUserGroup();
+        if(userID != null) {
+            newLink.setUserId(userID);
+        }
+        if(groupID != null) {
+            newLink.setGroupId(groupID);
+        }
         groupService.getGroupById(groupID).get().setNumberOfMembers(groupService.getGroupById(groupID).
-                get().getNumberOfMembers() + 1);
-        LinkUserGroup savedLink = lUserGroupRepository.saveAndFlush(linkUserGroup);
+                    get().getNumberOfMembers() + 1);
+        LinkUserGroup savedLink = lUserGroupRepository.saveAndFlush(newLink);
         return getLinkById(savedLink.getId()).isPresent();
     }
+
+    @Transactional
+    public Boolean leaveGroup(Long groupID, Long userID) {
+        if (lUserGroupRepository.existsAllByUserIdAndGroupId(userID, groupID)) {
+            groupService.getGroupById(groupID).get().setNumberOfMembers(groupService.getGroupById(groupID).
+                    get().getNumberOfMembers() - 1);
+           return deleteLinkById(lUserGroupRepository.findAllByUserIdAndGroupId(userID, groupID).get().getId());
+        }
+        return false;
+    }
+
+    @Transactional
+    public Boolean deleteUserFromMyGroup(Long userID, Long groupID, Long groupAdminId) {
+        if (lUserGroupRepository.existsAllByUserIdAndGroupId(userID, groupID)) {
+            if(groupAdminId.equals(groupService.getGroupById(groupID).get().getGroupAdminID())){
+                groupService.getGroupById(groupID).get().setNumberOfMembers(groupService.getGroupById(groupID).
+                        get().getNumberOfMembers() - 1);
+                return deleteLinkById(lUserGroupRepository.findAllByUserIdAndGroupId(userID, groupID).get().getId());
+            }
+            return false;
+        }
+        return false;
+    }
+
+
 }

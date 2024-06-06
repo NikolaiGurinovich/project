@@ -88,6 +88,9 @@ public class UserService {
             return false;
         }
         Followers follow = new Followers();
+        if (followersRepository.existsAllByUserIdAndSubUserId(id, userSecurity.get().getUserId())){
+            return false;
+        }
         follow.setUserId(id);
         follow.setSubUserId(userSecurity.get().getUserId());
         Followers savedFollow = followersRepository.save(follow);

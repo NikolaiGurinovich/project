@@ -35,6 +35,9 @@ public class LikesService {
     }
 
     public Boolean createLike(Likes likes) {
+        if (likesRepository.existsAllByUserIdAndWorkoutId(likes.getUserId(), likes.getWorkoutId())) {
+            return false;
+        }
         Likes like = new Likes();
         like.setUserId(likes.getUserId());
         like.setWorkoutId(likes.getWorkoutId());
@@ -46,6 +49,9 @@ public class LikesService {
         Optional<Likes> likeFromDBOptional = likesRepository.findById(like.getId());
         if (likeFromDBOptional.isPresent()) {
             Likes likeFromDB = likeFromDBOptional.get();
+            if (likesRepository.existsAllByUserIdAndWorkoutId(like.getUserId(), like.getWorkoutId())) {
+                return false;
+            }
             if (like.getUserId() != null){
                 likeFromDB.setUserId(like.getUserId());
             } else return false;
@@ -59,6 +65,9 @@ public class LikesService {
     }
 
     public Boolean likeWorkout(Long workoutId, Long userId ) {
+        if (likesRepository.existsAllByUserIdAndWorkoutId(userId, workoutId)) {
+            return false;
+        }
         Likes likes = new Likes();
         if(workoutId != null){
             likes.setWorkoutId(workoutId);

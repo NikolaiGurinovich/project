@@ -2,6 +2,7 @@ package com.example.project.controller;
 
 import com.example.project.model.Followers;
 import com.example.project.service.FollowersService;
+import com.example.project.service.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,12 @@ import java.util.Optional;
 @RequestMapping("/followers")
 public class FollowersController {
     private final FollowersService followersService;
+    private final UserService userService;
 
     @Autowired
-    public FollowersController(FollowersService followersService) {
+    public FollowersController(FollowersService followersService, UserService userService) {
         this.followersService = followersService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -45,13 +48,27 @@ public class FollowersController {
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }
+        if (checkBody(followers)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(followersService.createFollow(followers) ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 
     @PutMapping
-    public ResponseEntity<HttpStatus> updateFollow(@RequestBody Followers followers) {
+    public ResponseEntity<HttpStatus> updateFollow(@RequestBody @Valid Followers followers) {
         log.info("start updateFollow from FollowersController");
+        if (checkBody(followers)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(followersService.updateFollow(followers) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
+    }
+
+    private boolean checkBody(@RequestBody Followers followers) {
+        if(userService.getUserById(followers.getUserId()).isEmpty()){
+            log.error("user not found");
+            return true;
+        }
+        if(userService.getUserById(followers.getSubUserId()).isEmpty()){
+            log.error("sub user not found");
+            return true;
+        }
+        return false;
     }
 
     @DeleteMapping("/{id}")

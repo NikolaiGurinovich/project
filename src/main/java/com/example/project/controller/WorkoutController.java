@@ -58,7 +58,7 @@ public class WorkoutController {
     }
 
     @PutMapping
-    public ResponseEntity<HttpStatus> updateWorkout(@RequestBody Workout workout) {
+    public ResponseEntity<HttpStatus> updateWorkout(@RequestBody @Valid Workout workout) {
         log.info("start updateWorkout in WorkoutController");
         return new ResponseEntity<>(workoutService.updateWorkout(workout) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
     }

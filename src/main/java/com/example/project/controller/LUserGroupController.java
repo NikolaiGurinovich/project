@@ -1,7 +1,9 @@
 package com.example.project.controller;
 
 import com.example.project.model.LinkUserGroup;
+import com.example.project.service.GroupService;
 import com.example.project.service.LUserGroupService;
+import com.example.project.service.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +20,14 @@ import java.util.Optional;
 @RequestMapping("/link")
 public class LUserGroupController {
     private final LUserGroupService lUserGroupService;
+    private final UserService userService;
+    private final GroupService groupService;
 
     @Autowired
-    public LUserGroupController(LUserGroupService lUserGroupService) {
+    public LUserGroupController(LUserGroupService lUserGroupService, UserService userService, GroupService groupService) {
         this.lUserGroupService = lUserGroupService;
+        this.userService = userService;
+        this.groupService = groupService;
     }
 
     @GetMapping
@@ -46,15 +52,33 @@ public class LUserGroupController {
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }
+        if (checkBody(linkUserGroup)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(lUserGroupService.
                 createLink(linkUserGroup) ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 
     @PutMapping
-    public ResponseEntity<HttpStatus> updateLink(@RequestBody LinkUserGroup linkUserGroup) {
+    public ResponseEntity<HttpStatus> updateLink(@RequestBody @Valid LinkUserGroup linkUserGroup) {
         log.info("start method updateLink from LUserGroupController");
+        if (checkBody(linkUserGroup)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if (lUserGroupService.getLinkById(linkUserGroup.getId()).isEmpty()) {
+            log.error("link id not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(lUserGroupService.
                 updateLink(linkUserGroup) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
+    }
+
+    private boolean checkBody(@RequestBody LinkUserGroup linkUserGroup) {
+        if(userService.getUserById(linkUserGroup.getUserId()).isEmpty()) {
+            log.error("user not found");
+            return true;
+        }
+        if(groupService.getGroupById(linkUserGroup.getGroupId()).isEmpty()) {
+            log.error("group not found");
+            return true;
+        }
+        return false;
     }
 
     @DeleteMapping("/{id}")
