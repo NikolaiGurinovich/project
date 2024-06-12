@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,12 +29,14 @@ public class FollowersController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Followers>> getAllFollowers() {
         log.info("start getAllFollowers from FollowersController");
         return new ResponseEntity<>(followersService.getAllFollowers(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Followers> getFollowById(@PathVariable("id") Long id) {
         log.info("start getFollowersById from FollowersController");
         Optional<Followers> followers = followersService.getFollowById(id);
@@ -44,6 +47,7 @@ public class FollowersController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createFollow(@RequestBody @Valid Followers followers, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
@@ -53,6 +57,7 @@ public class FollowersController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> updateFollow(@RequestBody @Valid Followers followers) {
         log.info("start updateFollow from FollowersController");
         if (checkBody(followers)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,12 +32,14 @@ public class LikesController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Likes>> getAllLikes() {
         log.info("start getAllLikes from LikesController");
         return new ResponseEntity<>(likesService.getAllLikes(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Likes> getLikeById(@PathVariable("id") Long id) {
         log.info("start getLikeById from LikesController");
         Optional<Likes> like = likesService.getLikeById(id);
@@ -47,6 +50,7 @@ public class LikesController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createLike(@RequestBody @Valid Likes like, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
@@ -56,6 +60,7 @@ public class LikesController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> updateLike(@RequestBody @Valid Likes like) {
         log.info("start updateLike from LikesController");
         if (checkBody(like)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -79,6 +84,7 @@ public class LikesController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> deleteLikeById(@PathVariable("id") Long id) {
         log.info("start deleteLikeById from LikesController");
         return new ResponseEntity<>(likesService.deleteLikeById(id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);

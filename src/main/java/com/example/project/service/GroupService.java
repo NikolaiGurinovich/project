@@ -97,4 +97,16 @@ public class GroupService {
         Group savedGroup = groupRepository.save(group);
         return getGroupById(savedGroup.getId()).isPresent();
     }
+
+    public Boolean deleteGroupByGroupAdmin (Long groupID, Long groupAdminID) {
+        Optional<Group> groupFromDBOptional = groupRepository.findById(groupID);
+        if (groupFromDBOptional.isEmpty()) {
+            return false;
+        }
+        Group groupFromDB = groupFromDBOptional.get();
+        if (groupFromDB.getGroupAdminID().equals(groupAdminID)) {
+            deleteGroupById(groupID);
+        }
+        return true;
+    }
 }

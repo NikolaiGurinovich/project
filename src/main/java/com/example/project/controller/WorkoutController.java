@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,12 +35,14 @@ public class WorkoutController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Workout>> getAllWorkouts() {
         log.info("start getAllWorkouts in WorkoutController");
         return new ResponseEntity<>(workoutService.getAllWorkouts(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<Workout> getWorkoutById(@PathVariable("id") Long id) {
         log.info("start getWorkoutById in WorkoutController");
         Optional<Workout> workout = workoutService.getWorkoutById(id);
@@ -50,6 +53,7 @@ public class WorkoutController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createWorkout(@RequestBody @Valid Workout workout, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
@@ -58,18 +62,21 @@ public class WorkoutController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> updateWorkout(@RequestBody @Valid Workout workout) {
         log.info("start updateWorkout in WorkoutController");
         return new ResponseEntity<>(workoutService.updateWorkout(workout) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> deleteWorkoutById(@PathVariable("id") Long id) {
         log.info("start deleteWorkoutById in WorkoutController");
         return new ResponseEntity<>(workoutService.deleteWorkoutById(id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
     }
 
     @PostMapping("/add")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<HttpStatus> addWorkout(@RequestBody @Valid AddWorkoutDto addWorkoutDto, Principal principal) {
         log.info("start addWorkout in WorkoutController");
         Optional<User> user = userService.getInfoAboutCurrentUser(principal.getName());
@@ -81,6 +88,7 @@ public class WorkoutController {
     }
 
     @PostMapping("/like/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<HttpStatus> likeWorkout(@PathVariable("id") Long id, Principal principal) {
         log.info("start likeWorkout in WorkoutController");
         Optional<User> user = userService.getInfoAboutCurrentUser(principal.getName());

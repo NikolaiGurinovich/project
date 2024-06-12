@@ -4,6 +4,7 @@ import com.example.project.model.Followers;
 import com.example.project.model.User;
 import com.example.project.repository.FollowersRepository;
 import com.example.project.repository.UserRepository;
+import com.example.project.security.enums.Roles;
 import com.example.project.security.model.SecurityUser;
 import com.example.project.security.repository.UserSecurityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,5 +96,16 @@ public class UserService {
         follow.setSubUserId(userSecurity.get().getUserId());
         Followers savedFollow = followersRepository.save(follow);
         return followersRepository.existsById(savedFollow.getId());
+    }
+
+    public Boolean changeUserToAdmin (Long id) {
+        Optional<User> userCheck = getUserById(id);
+        if (userCheck.isEmpty()){
+            return false;
+        }
+        SecurityUser securityUser = userSecurityRepository.findByUserId(id).get();
+        securityUser.setRole(Roles.ADMIN);
+        SecurityUser updatedUser = userSecurityRepository.saveAndFlush(securityUser);
+        return !updatedUser.equals(userCheck.get());
     }
 }

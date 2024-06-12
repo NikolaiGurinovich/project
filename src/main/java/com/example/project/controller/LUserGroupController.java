@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,12 +32,14 @@ public class LUserGroupController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<LinkUserGroup>> getAllLinks() {
         log.info("start method getAllLinks from LUserGroupController");
         return new ResponseEntity<>(lUserGroupService.getAllLinks(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LinkUserGroup> getLinkById(@PathVariable("id") Long id) {
         log.info("start method getLinkById from LUserGroupController");
         Optional<LinkUserGroup> linkUserGroup = lUserGroupService.getLinkById(id);
@@ -47,6 +50,7 @@ public class LUserGroupController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createLink(@RequestBody @Valid LinkUserGroup linkUserGroup,
                                                  BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -58,6 +62,7 @@ public class LUserGroupController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> updateLink(@RequestBody @Valid LinkUserGroup linkUserGroup) {
         log.info("start method updateLink from LUserGroupController");
         if (checkBody(linkUserGroup)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -82,6 +87,7 @@ public class LUserGroupController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> deleteLinkById(@PathVariable("id") Long id) {
         log.info("start method deleteLinkById from LUserGroupController");
         return new ResponseEntity<>(lUserGroupService.deleteLinkById(id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);

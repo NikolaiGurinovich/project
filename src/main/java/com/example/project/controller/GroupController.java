@@ -1,5 +1,6 @@
 package com.example.project.controller;
 
+import com.example.project.model.Followers;
 import com.example.project.model.Group;
 import com.example.project.model.User;
 import com.example.project.model.dto.CreateGroupByUserDto;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,11 +37,13 @@ public class GroupController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Group>> getAllGroups() {
         return new ResponseEntity<>(groupService.getAllGroups(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<Group> getGroupById(@PathVariable("id") Long id) {
         log.info("start method getGroupById in GroupController");
         Optional<Group> group = groupService.getGroupById(id);
@@ -50,6 +54,7 @@ public class GroupController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createGroup(@RequestBody @Valid Group group, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
@@ -61,6 +66,7 @@ public class GroupController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> updateGroup(@RequestBody @Valid Group group) {
         log.info("start method updateGroup in GroupController");
         if(userService.getUserById(group.getGroupAdminID()).isEmpty()){
@@ -73,12 +79,14 @@ public class GroupController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> deleteGroupById(@PathVariable("id") Long id) {
         log.info("start method deleteGroupById in GroupController");
         return new ResponseEntity<>(groupService.deleteGroupById(id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
     }
 
     @PostMapping("/create")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<HttpStatus> createGroupByUser(@RequestBody @Valid CreateGroupByUserDto createGroupByUserDto
             , BindingResult bindingResult, Principal principal) {
         log.info("start method createGroupByUser in GroupController");
@@ -94,49 +102,78 @@ public class GroupController {
     }
 
     @PostMapping("/join/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<HttpStatus> joinGroup(@PathVariable("id") Long id, Principal principal) {
         log.info("start method joinGroup in GroupController");
-        Optional<User> newMember = userService.getInfoAboutCurrentUser(principal.getName());
-        if (newMember.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        Optional<Group> targetGroup = groupService.getGroupById(id);
-        if (targetGroup.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(lUserGroupService.joinGroup(id, newMember.get().getId())
+        if (checkBody(principal, id)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(lUserGroupService.joinGroup(id,
+                userService.getInfoAboutCurrentUser(principal.getName()).get().getId())
                 ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 
     @DeleteMapping("/leave/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<HttpStatus> leaveGroup(@PathVariable("id") Long id, Principal principal) {
         log.info("start method leaveGroup in GroupController");
-        Optional<User> member = userService.getInfoAboutCurrentUser(principal.getName());
-        if (member.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        Optional<Group> targetGroup = groupService.getGroupById(id);
-        if (targetGroup.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(lUserGroupService.leaveGroup(id, member.get().getId())
+        if (checkBody(principal, id)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(lUserGroupService.leaveGroup(id,
+                userService.getInfoAboutCurrentUser(principal.getName()).get().getId())
                 ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
     }
 
     @DeleteMapping("/user/{userId}/{groupId}")
+    @PreAuthorize("hasRole('GROUP_ADMIN')")
     public ResponseEntity<HttpStatus> deleteUserFromMyGroup(@PathVariable("userId") Long userId,
                                                             @PathVariable("groupId") Long groupId,
                                                             Principal principal) {
         log.info("start method deleteUserFromMyGroup in GroupController");
-        Optional<User> groupAdmin = userService.getInfoAboutCurrentUser(principal.getName());
-        if (groupAdmin.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        Optional<Group> targetGroup = groupService.getGroupById(groupId);
-        if (targetGroup.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(lUserGroupService.deleteUserFromMyGroup(userId, groupId, groupAdmin.get().getId())
+        if (checkBody(principal, groupId)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(lUserGroupService.deleteUserFromMyGroup(userId, groupId,
+                userService.getInfoAboutCurrentUser(principal.getName()).get().getId())
                 ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('GROUP_ADMIN')")
+    public ResponseEntity<HttpStatus> deleteGroupByGroupAdmin(@PathVariable("id") Long id, Principal principal) {
+        log.info("start method deleteGroup in GroupController");
+        if (checkBody(principal, id)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(groupService.deleteGroupByGroupAdmin(id,
+                userService.getInfoAboutCurrentUser(principal.getName()).get().getId())
+                ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
+    }
+
+    @DeleteMapping("/user/{userId}/group{groupId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity <HttpStatus> deleteUserFromGroup(@PathVariable("userId") Long userId,
+                                                           @PathVariable("groupId") Long groupId
+            , Principal principal) {
+        log.info("start method deleteUserFromGroup in GroupController");
+        Optional<User> admin = userService.getInfoAboutCurrentUser(principal.getName());
+        if (admin.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Optional<User> user = userService.getUserById(userId);
+        if (user.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Optional<Group> group = groupService.getGroupById(groupId);
+        if (group.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(lUserGroupService.deleteUserFromGroup(userId, groupId)
+                ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
+    }
+
+    private boolean checkBody(@RequestBody Principal principal, Long id) {
+        Optional<User> user = userService.getInfoAboutCurrentUser(principal.getName());
+        if (user.isEmpty()){
+            return true;
+        }
+        Optional<Group> targetGroup = groupService.getGroupById(id);
+        if (targetGroup.isEmpty()) {
+            return true;
+        }
+        return false;
     }
 }

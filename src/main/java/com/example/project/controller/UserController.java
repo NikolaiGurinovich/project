@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,12 +28,14 @@ public class UserController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<User>> getAllUsers() {
         log.info("start method getAllUsers in UserController");
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
         log.info("start method getUserById in UserController");
         Optional<User> user = userService.getUserById(id);
@@ -43,6 +46,7 @@ public class UserController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createUser(@RequestBody @Valid User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
@@ -51,18 +55,21 @@ public class UserController {
     }
 
     @PutMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> updateUser(@RequestBody @Valid User user) {
         log.info("start method updateUser in UserController");
         return new ResponseEntity<>(userService.updateUser(user) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> deleteUserById(@PathVariable("id") Long id) {
         log.info("start method deleteUserById in UserController");
         return new ResponseEntity<>(userService.deleteUserById(id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
     }
 
     @GetMapping("/info")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<User> getInfoAboutCurrentUser(Principal principal){
         Optional<User> result = userService.getInfoAboutCurrentUser(principal.getName());
         if (result.isEmpty()){
@@ -72,6 +79,7 @@ public class UserController {
     }
 
     @PostMapping("/subscribe/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<HttpStatus> subscribe(@PathVariable("id") Long id, Principal principal) {
         log.info("start method subscribe in UserController");
         Optional<User> subscriber = userService.getInfoAboutCurrentUser(principal.getName());
@@ -86,5 +94,20 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(userService.subscribe(principal, id) ? HttpStatus.CREATED : HttpStatus.CONFLICT);
+    }
+
+    @PutMapping("/admin/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<HttpStatus> changeUserToAdmin(@PathVariable("id") Long id, Principal principal) {
+        log.info("start method changeUserToAdmin in UserController");
+        Optional<User> admin = userService.getInfoAboutCurrentUser(principal.getName());
+        if (admin.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Optional<User> userToChange = userService.getUserById(id);
+        if (userToChange.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(userService.changeUserToAdmin(id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
     }
 }

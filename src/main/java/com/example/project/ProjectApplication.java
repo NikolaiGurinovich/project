@@ -9,9 +9,7 @@ public class ProjectApplication {
     public static void main(String[] args) {
         SpringApplication.run(ProjectApplication.class, args);
     }
-
-    //:TODO возможности юзера:
-    //:TODO возможности админа группы: удалить группу,
-    //:TODO возможности админа: удалить пользователя, удалить группу, сделать юзера админом, удалить из любой группы
-
+    //:TODO изменить время действия токена
+    //:TODO добавить методы обновления для юзера, группы для отписки от юзера
+    //eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJuaWtvbGF5Lmd1cmlub3ZpY2hAZ21haWwuY29tIiwiZXhwIjoxNzE4MjMxMDkwfQ.MJE6sUvUOMO-jJ2XhLIIdhoQiene1NQG1ShlpGEV_W8
 }
