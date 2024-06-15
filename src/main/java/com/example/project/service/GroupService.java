@@ -1,6 +1,7 @@
 package com.example.project.service;
 
 import com.example.project.model.Group;
+import com.example.project.model.User;
 import com.example.project.model.dto.CreateGroupByUserDto;
 import com.example.project.repository.GroupRepository;
 import com.example.project.repository.UserRepository;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,16 +21,19 @@ import java.util.Optional;
 
 @Service
 public class GroupService {
-    private static final Logger log = LoggerFactory.getLogger(GroupService.class);
+
     private final GroupRepository groupRepository;
     private final UserSecurityRepository userSecurityRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public GroupService(GroupRepository groupRepository, UserSecurityRepository userSecurityRepository, UserRepository userRepository) {
+    public GroupService(GroupRepository groupRepository, UserSecurityRepository userSecurityRepository,
+                        UserRepository userRepository, UserService userService) {
         this.groupRepository = groupRepository;
         this.userSecurityRepository = userSecurityRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public List<Group> getAllGroups() {
@@ -50,6 +55,9 @@ public class GroupService {
 
     public Boolean createGroup(Group group) {
         Group newGroup = new Group();
+        if (group.getGroupName().isBlank()){
+            return false;
+        }
         if(groupRepository.existsByGroupName(group.getGroupName())){
             return false;
         }
@@ -68,7 +76,10 @@ public class GroupService {
         Optional<Group> groupFromDBOptional = groupRepository.findById(group.getId());
         if (groupFromDBOptional.isPresent()) {
             Group groupFromDB = groupFromDBOptional.get();
-            if (group.getGroupName() != null && !groupRepository.existsByGroupName(group.getGroupName())){
+            if (group.getGroupName().isBlank()){
+                return false;
+            }
+            if (!groupRepository.existsByGroupName(group.getGroupName())){
                 groupFromDB.setGroupName(group.getGroupName());
             } else return false;
             if(!userRepository.existsById(group.getGroupAdminID())){
@@ -85,8 +96,10 @@ public class GroupService {
     @Transactional
     public Boolean createGroupByUser (CreateGroupByUserDto createGroupByUserDto, String userLogin) {
         Group group = new Group();
-        if (createGroupByUserDto.getGroupName() != null
-                && !groupRepository.existsByGroupName(createGroupByUserDto.getGroupName())) {
+        if (createGroupByUserDto.getGroupName().isBlank()){
+            return false;
+        }
+        if (!groupRepository.existsByGroupName(createGroupByUserDto.getGroupName())) {
             group.setGroupName(createGroupByUserDto.getGroupName());
         }
         group.setCreated(Timestamp.valueOf(LocalDateTime.now()));
@@ -106,7 +119,30 @@ public class GroupService {
         Group groupFromDB = groupFromDBOptional.get();
         if (groupFromDB.getGroupAdminID().equals(groupAdminID)) {
             deleteGroupById(groupID);
+            return true;
         }
-        return true;
+        return false;
+    }
+
+    public Boolean updateMyGroupName (Long groupID, CreateGroupByUserDto createGroupByUserDto, Principal principal) {
+        Optional<Group> groupFromDBOptional = groupRepository.findById(groupID);
+        if (groupFromDBOptional.isEmpty()) {
+            return false;
+        }
+        Optional<User> groupAdmin = userService.getInfoAboutCurrentUser(principal.getName());
+        if (groupFromDBOptional.isEmpty()) {
+            return false;
+        }
+        if (!groupFromDBOptional.get().getGroupAdminID().equals(groupAdmin.get().getId())){
+            return false;
+        }
+        Group groupFromDB = groupFromDBOptional.get();
+        if(createGroupByUserDto.getGroupName().isBlank()){
+            return false;
+        }
+        groupFromDB.setGroupName(createGroupByUserDto.getGroupName());
+        groupFromDB.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
+        Group updatedGroup = groupRepository.saveAndFlush(groupFromDB);
+        return getGroupById(updatedGroup.getId()).isPresent();
     }
 }

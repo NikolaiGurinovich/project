@@ -40,7 +40,9 @@ public class UserSecurityService {
             throw new UserAlreadyExists(registrationDto.getLogin());
         }
         User user = new User();
-        user.setUserName(registrationDto.getUserName());
+        if(!registrationDto.getUserName().isBlank()){
+            user.setUserName(registrationDto.getUserName());
+        }
         user.setUserAge(registrationDto.getUserAge());
         user.setGender(registrationDto.getGender());
         user.setUserWeight(registrationDto.getUserWeight());

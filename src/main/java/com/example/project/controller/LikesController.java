@@ -20,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/likes")
 public class LikesController {
+
     private final LikesService likesService;
     private final UserService userService;
     private final WorkoutService workoutService;

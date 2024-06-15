@@ -15,6 +15,7 @@ import java.util.Optional;
 
 @Service
 public class WorkoutService {
+
     private final WorkoutRepository workoutRepository;
     private final UserRepository userRepository;
 
@@ -87,7 +88,13 @@ public class WorkoutService {
         }
         Workout newWorkout = new Workout();
         newWorkout.setWorkoutType(addWorkoutDto.getWorkoutType());
+        if(addWorkoutDto.getWorkoutDistance() < 0){
+            return false;
+        }
         newWorkout.setWorkoutDistance(addWorkoutDto.getWorkoutDistance());
+        if(addWorkoutDto.getWorkoutTime() < 0){
+            return false;
+        }
         newWorkout.setWorkoutTime(addWorkoutDto.getWorkoutTime());
         newWorkout.setUserId(userId);
         newWorkout.setCreated(Timestamp.valueOf(LocalDateTime.now()));

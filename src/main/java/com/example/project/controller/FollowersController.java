@@ -19,6 +19,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/followers")
 public class FollowersController {
+
     private final FollowersService followersService;
     private final UserService userService;
 
@@ -77,6 +78,7 @@ public class FollowersController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> deleteFollowById(@PathVariable("id") Long id) {
         log.info("start deleteFollowById from FollowersController");
         return new ResponseEntity<>(followersService.deleteFollowById(id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);

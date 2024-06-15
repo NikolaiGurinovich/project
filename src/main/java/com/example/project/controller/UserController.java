@@ -1,6 +1,7 @@
 package com.example.project.controller;
 
 import com.example.project.model.User;
+import com.example.project.model.dto.UpdateUserDto;
 import com.example.project.service.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -56,8 +57,11 @@ public class UserController {
 
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<HttpStatus> updateUser(@RequestBody @Valid User user) {
-        log.info("start method updateUser in UserController");
+    public ResponseEntity<HttpStatus> updateUser(@RequestBody @Valid User user, BindingResult bindingResult) {
+        log.info("start method updateUser in UserController(Admin)");
+        if (bindingResult.hasErrors()) {
+            log.error(bindingResult.getFieldError().getDefaultMessage());
+        }
         return new ResponseEntity<>(userService.updateUser(user) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
     }
 
@@ -94,6 +98,40 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(userService.subscribe(principal, id) ? HttpStatus.CREATED : HttpStatus.CONFLICT);
+    }
+
+    @DeleteMapping("/subscribe/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
+    public ResponseEntity<HttpStatus> unsubscribe(@PathVariable("id") Long id, Principal principal) {
+        log.info("start method unsubscribe in UserController");
+        Optional<User> subscriber = userService.getInfoAboutCurrentUser(principal.getName());
+        if (subscriber.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Optional<User> userToUnsubscribe = userService.getUserById(id);
+        if (userToUnsubscribe.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        if (subscriber.get().getId().equals(id)){
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(userService.unsubscribe(principal, id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
+    }
+
+    @PutMapping("/update")
+    @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
+    public ResponseEntity<HttpStatus> updateCurrentUser(@RequestBody @Valid UpdateUserDto updateUserDto,
+                                                 BindingResult bindingResult, Principal principal) {
+        log.info("start method updateUser in UserController");
+        if (bindingResult.hasErrors()) {
+            log.error(bindingResult.getFieldError().getDefaultMessage());
+        }
+        Optional<User> userToUpdate = userService.getInfoAboutCurrentUser(principal.getName());
+        if (userToUpdate.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(userService.updateCurrentUser(updateUserDto, principal)
+                ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
     }
 
     @PutMapping("/admin/{id}")

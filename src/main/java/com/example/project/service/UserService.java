@@ -2,6 +2,7 @@ package com.example.project.service;
 
 import com.example.project.model.Followers;
 import com.example.project.model.User;
+import com.example.project.model.dto.UpdateUserDto;
 import com.example.project.repository.FollowersRepository;
 import com.example.project.repository.UserRepository;
 import com.example.project.security.enums.Roles;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 @Service
 public class UserService {
+
     private final UserRepository userRepository;
     private final UserSecurityRepository userSecurityRepository;
     private final FollowersRepository followersRepository;
@@ -107,5 +109,44 @@ public class UserService {
         securityUser.setRole(Roles.ADMIN);
         SecurityUser updatedUser = userSecurityRepository.saveAndFlush(securityUser);
         return !updatedUser.equals(userCheck.get());
+    }
+
+    public Boolean unsubscribe(Principal principal, Long id) {
+        Optional<SecurityUser> userSecurity = userSecurityRepository.findByUserLogin(principal.getName());
+        if (userSecurity.isEmpty()){
+            return false;
+        }
+        if (!followersRepository.existsAllByUserIdAndSubUserId(id, userSecurity.get().getUserId())){
+            return false;
+        }
+        Optional<Followers> followers = followersRepository.findAllByUserIdAndSubUserId(id, userSecurity.get().getUserId());
+        if (followers.isEmpty()){
+            return false;
+        }
+        followersRepository.delete(followers.get());
+        return !followersRepository.existsById(followers.get().getId());
+    }
+
+    public Boolean updateCurrentUser(UpdateUserDto updateUserDto, Principal principal) {
+        Optional<User> user = getInfoAboutCurrentUser(principal.getName());
+        if (user.isEmpty()){
+            return false;
+        }
+        User userToUpdate = user.get();
+        if(updateUserDto.getUserName() != null){
+            userToUpdate.setUserName(updateUserDto.getUserName());
+        }
+        if(updateUserDto.getUserAge() != null){
+            userToUpdate.setUserAge(updateUserDto.getUserAge());
+        }
+        if(updateUserDto.getUserWeight() != null){
+            userToUpdate.setUserWeight(updateUserDto.getUserWeight());
+        }
+        if(updateUserDto.getGender() != null){
+            userToUpdate.setGender(updateUserDto.getGender());
+        }
+        userToUpdate.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
+        User updatedUser = userRepository.save(userToUpdate);
+        return userToUpdate.equals(updatedUser);
     }
 }

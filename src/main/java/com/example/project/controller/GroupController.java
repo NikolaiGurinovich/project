@@ -1,6 +1,5 @@
 package com.example.project.controller;
 
-import com.example.project.model.Followers;
 import com.example.project.model.Group;
 import com.example.project.model.User;
 import com.example.project.model.dto.CreateGroupByUserDto;
@@ -101,6 +100,19 @@ public class GroupController {
                 ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 
+    @PutMapping("/update/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','GROUP_ADMIN')")
+    public ResponseEntity<HttpStatus> updateMyGroupName(@PathVariable("id") Long id,
+                                                        @RequestBody @Valid CreateGroupByUserDto createGroupByUserDto,
+                                                        BindingResult bindingResult, Principal principal) {
+        if (bindingResult.hasErrors()) {
+            log.error(bindingResult.getFieldError().getDefaultMessage());
+        }
+        if (checkBody(principal, id)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(groupService.updateMyGroupName(id, createGroupByUserDto, principal)
+                ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
+    }
+
     @PostMapping("/join/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<HttpStatus> joinGroup(@PathVariable("id") Long id, Principal principal) {
@@ -128,6 +140,9 @@ public class GroupController {
                                                             Principal principal) {
         log.info("start method deleteUserFromMyGroup in GroupController");
         if (checkBody(principal, groupId)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        if(userService.getUserById(userId).isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(lUserGroupService.deleteUserFromMyGroup(userId, groupId,
                 userService.getInfoAboutCurrentUser(principal.getName()).get().getId())
                 ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
@@ -143,7 +158,7 @@ public class GroupController {
                 ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
     }
 
-    @DeleteMapping("/user/{userId}/group{groupId}")
+    @DeleteMapping("/user/{userId}/group/{groupId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity <HttpStatus> deleteUserFromGroup(@PathVariable("userId") Long userId,
                                                            @PathVariable("groupId") Long groupId

@@ -13,6 +13,7 @@ import java.util.Optional;
 
 @Service
 public class LUserGroupService {
+
     private final LUserGroupRepository lUserGroupRepository;
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
@@ -80,6 +81,9 @@ public class LUserGroupService {
     @Transactional
     public Boolean joinGroup(Long groupID, Long userID) {
         if (lUserGroupRepository.existsAllByUserIdAndGroupId(userID, groupID)) {
+            return false;
+        }
+        if (groupRepository.findById(groupID).get().getGroupAdminID().equals(userID)) {
             return false;
         }
         LinkUserGroup newLink = new LinkUserGroup();

@@ -23,6 +23,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/workout")
 public class WorkoutController {
+
     private final WorkoutService workoutService;
     private final UserService userService;
     private final LikesService likesService;

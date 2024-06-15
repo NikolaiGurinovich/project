@@ -20,6 +20,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/link")
 public class LUserGroupController {
+
     private final LUserGroupService lUserGroupService;
     private final UserService userService;
     private final GroupService groupService;

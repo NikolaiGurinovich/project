@@ -17,7 +17,6 @@ public class RegistrationDto {
     @NotNull
     private String password;
 
-    @Size(min = 1, max = 30)
     @NotNull
     private String userName;
 
