@@ -76,11 +76,11 @@ public class LUserGroupController {
     }
 
     private boolean checkBody(@RequestBody LinkUserGroup linkUserGroup) {
-        if(userService.getUserById(linkUserGroup.getUserId()).isEmpty()) {
+        if (userService.getUserById(linkUserGroup.getUserId()).isEmpty()) {
             log.error("user not found");
             return true;
         }
-        if(groupService.getGroupById(linkUserGroup.getGroupId()).isEmpty()) {
+        if (groupService.getGroupById(linkUserGroup.getGroupId()).isEmpty()) {
             log.error("group not found");
             return true;
         }

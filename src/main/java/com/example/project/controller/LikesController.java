@@ -65,7 +65,7 @@ public class LikesController {
     public ResponseEntity<HttpStatus> updateLike(@RequestBody @Valid Likes like) {
         log.info("start updateLike from LikesController");
         if (checkBody(like)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        if(likesService.getLikeById(like.getId()).isEmpty()) {
+        if (likesService.getLikeById(like.getId()).isEmpty()) {
             log.error("like id not found ");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -73,7 +73,7 @@ public class LikesController {
     }
 
     private boolean checkBody(@RequestBody Likes like) {
-        if(workoutService.getWorkoutById(like.getWorkoutId()).isEmpty()) {
+        if (workoutService.getWorkoutById(like.getWorkoutId()).isEmpty()) {
             log.error("workout id not found");
             return true;
         }

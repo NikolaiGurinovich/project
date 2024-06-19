@@ -68,10 +68,10 @@ public class FollowersService {
             if (followersRepository.existsAllByUserIdAndSubUserId(followers.getUserId(), followers.getSubUserId())) {
                 return false;
             }
-            if (followers.getUserId() != null && userRepository.existsById(followers.getUserId())){
+            if (followers.getUserId() != null && userRepository.existsById(followers.getUserId())) {
                 followFromDB.setUserId(followers.getUserId());
             } else return false;
-            if (followers.getSubUserId() != null && userRepository.existsById(followers.getSubUserId())){
+            if (followers.getSubUserId() != null && userRepository.existsById(followers.getSubUserId())) {
                 followFromDB.setSubUserId(followers.getSubUserId());
             } else return false;
             Followers updatedFollow = followersRepository.saveAndFlush(followFromDB);

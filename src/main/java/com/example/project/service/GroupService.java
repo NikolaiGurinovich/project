@@ -47,7 +47,7 @@ public class GroupService {
     public Boolean deleteGroupById(Long id) {
         Optional<Group> group = groupRepository.findById(id);
         if (group.isEmpty()) {
-           return false;
+            return false;
         }
         groupRepository.deleteById(id);
         return groupRepository.findById(id).isEmpty();
@@ -55,14 +55,14 @@ public class GroupService {
 
     public Boolean createGroup(Group group) {
         Group newGroup = new Group();
-        if (group.getGroupName().isBlank()){
+        if (group.getGroupName().isBlank()) {
             return false;
         }
-        if(groupRepository.existsByGroupName(group.getGroupName())){
+        if (groupRepository.existsByGroupName(group.getGroupName())) {
             return false;
         }
         newGroup.setGroupName(group.getGroupName());
-        if(!userRepository.existsById(group.getGroupAdminID())){
+        if (!userRepository.existsById(group.getGroupAdminID())) {
             return false;
         }
         newGroup.setGroupAdminID(group.getGroupAdminID());
@@ -76,13 +76,13 @@ public class GroupService {
         Optional<Group> groupFromDBOptional = groupRepository.findById(group.getId());
         if (groupFromDBOptional.isPresent()) {
             Group groupFromDB = groupFromDBOptional.get();
-            if (group.getGroupName().isBlank()){
+            if (group.getGroupName().isBlank()) {
                 return false;
             }
-            if (!groupRepository.existsByGroupName(group.getGroupName())){
+            if (!groupRepository.existsByGroupName(group.getGroupName())) {
                 groupFromDB.setGroupName(group.getGroupName());
             } else return false;
-            if(!userRepository.existsById(group.getGroupAdminID())){
+            if (!userRepository.existsById(group.getGroupAdminID())) {
                 return false;
             }
             groupFromDB.setGroupAdminID(group.getGroupAdminID());
@@ -94,9 +94,9 @@ public class GroupService {
     }
 
     @Transactional
-    public Boolean createGroupByUser (CreateGroupByUserDto createGroupByUserDto, String userLogin) {
+    public Boolean createGroupByUser(CreateGroupByUserDto createGroupByUserDto, String userLogin) {
         Group group = new Group();
-        if (createGroupByUserDto.getGroupName().isBlank()){
+        if (createGroupByUserDto.getGroupName().isBlank()) {
             return false;
         }
         if (!groupRepository.existsByGroupName(createGroupByUserDto.getGroupName())) {
@@ -111,7 +111,7 @@ public class GroupService {
         return getGroupById(savedGroup.getId()).isPresent();
     }
 
-    public Boolean deleteGroupByGroupAdmin (Long groupID, Long groupAdminID) {
+    public Boolean deleteGroupByGroupAdmin(Long groupID, Long groupAdminID) {
         Optional<Group> groupFromDBOptional = groupRepository.findById(groupID);
         if (groupFromDBOptional.isEmpty()) {
             return false;
@@ -124,7 +124,7 @@ public class GroupService {
         return false;
     }
 
-    public Boolean updateMyGroupName (Long groupID, CreateGroupByUserDto createGroupByUserDto, Principal principal) {
+    public Boolean updateMyGroupName(Long groupID, CreateGroupByUserDto createGroupByUserDto, Principal principal) {
         Optional<Group> groupFromDBOptional = groupRepository.findById(groupID);
         if (groupFromDBOptional.isEmpty()) {
             return false;
@@ -133,11 +133,11 @@ public class GroupService {
         if (groupFromDBOptional.isEmpty()) {
             return false;
         }
-        if (!groupFromDBOptional.get().getGroupAdminID().equals(groupAdmin.get().getId())){
+        if (!groupFromDBOptional.get().getGroupAdminID().equals(groupAdmin.get().getId())) {
             return false;
         }
         Group groupFromDB = groupFromDBOptional.get();
-        if(createGroupByUserDto.getGroupName().isBlank()){
+        if (createGroupByUserDto.getGroupName().isBlank()) {
             return false;
         }
         groupFromDB.setGroupName(createGroupByUserDto.getGroupName());

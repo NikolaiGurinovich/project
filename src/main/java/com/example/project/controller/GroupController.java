@@ -58,7 +58,7 @@ public class GroupController {
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }
-        if(userService.getUserById(group.getGroupAdminID()).isEmpty()){
+        if (userService.getUserById(group.getGroupAdminID()).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(groupService.createGroup(group) ? HttpStatus.CREATED : HttpStatus.CONFLICT);
@@ -68,7 +68,7 @@ public class GroupController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> updateGroup(@RequestBody @Valid Group group) {
         log.info("start method updateGroup in GroupController");
-        if(userService.getUserById(group.getGroupAdminID()).isEmpty()){
+        if (userService.getUserById(group.getGroupAdminID()).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         if (groupService.getGroupById(group.getId()).isEmpty()) {
@@ -93,10 +93,10 @@ public class GroupController {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }
         Optional<User> creator = userService.getInfoAboutCurrentUser(principal.getName());
-        if (creator.isEmpty()){
+        if (creator.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new  ResponseEntity<>(groupService.createGroupByUser(createGroupByUserDto, principal.getName())
+        return new ResponseEntity<>(groupService.createGroupByUser(createGroupByUserDto, principal.getName())
                 ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 
@@ -140,7 +140,7 @@ public class GroupController {
                                                             Principal principal) {
         log.info("start method deleteUserFromMyGroup in GroupController");
         if (checkBody(principal, groupId)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        if(userService.getUserById(userId).isEmpty()){
+        if (userService.getUserById(userId).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(lUserGroupService.deleteUserFromMyGroup(userId, groupId,
@@ -160,20 +160,20 @@ public class GroupController {
 
     @DeleteMapping("/user/{userId}/group/{groupId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity <HttpStatus> deleteUserFromGroup(@PathVariable("userId") Long userId,
-                                                           @PathVariable("groupId") Long groupId
+    public ResponseEntity<HttpStatus> deleteUserFromGroup(@PathVariable("userId") Long userId,
+                                                          @PathVariable("groupId") Long groupId
             , Principal principal) {
         log.info("start method deleteUserFromGroup in GroupController");
         Optional<User> admin = userService.getInfoAboutCurrentUser(principal.getName());
-        if (admin.isEmpty()){
+        if (admin.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Optional<User> user = userService.getUserById(userId);
-        if (user.isEmpty()){
+        if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Optional<Group> group = groupService.getGroupById(groupId);
-        if (group.isEmpty()){
+        if (group.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(lUserGroupService.deleteUserFromGroup(userId, groupId)
@@ -182,7 +182,7 @@ public class GroupController {
 
     private boolean checkBody(@RequestBody Principal principal, Long id) {
         Optional<User> user = userService.getInfoAboutCurrentUser(principal.getName());
-        if (user.isEmpty()){
+        if (user.isEmpty()) {
             return true;
         }
         Optional<Group> targetGroup = groupService.getGroupById(id);

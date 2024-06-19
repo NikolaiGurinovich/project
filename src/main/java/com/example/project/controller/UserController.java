@@ -74,9 +74,9 @@ public class UserController {
 
     @GetMapping("/info")
     @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
-    public ResponseEntity<User> getInfoAboutCurrentUser(Principal principal){
+    public ResponseEntity<User> getInfoAboutCurrentUser(Principal principal) {
         Optional<User> result = userService.getInfoAboutCurrentUser(principal.getName());
-        if (result.isEmpty()){
+        if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result.get(), HttpStatus.OK);
@@ -87,14 +87,14 @@ public class UserController {
     public ResponseEntity<HttpStatus> subscribe(@PathVariable("id") Long id, Principal principal) {
         log.info("start method subscribe in UserController");
         Optional<User> subscriber = userService.getInfoAboutCurrentUser(principal.getName());
-        if (subscriber.isEmpty()){
+        if (subscriber.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Optional<User> userToSubscribe = userService.getUserById(id);
-        if (userToSubscribe.isEmpty()){
+        if (userToSubscribe.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        if (subscriber.get().getId().equals(id)){
+        if (subscriber.get().getId().equals(id)) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(userService.subscribe(principal, id) ? HttpStatus.CREATED : HttpStatus.CONFLICT);
@@ -105,14 +105,14 @@ public class UserController {
     public ResponseEntity<HttpStatus> unsubscribe(@PathVariable("id") Long id, Principal principal) {
         log.info("start method unsubscribe in UserController");
         Optional<User> subscriber = userService.getInfoAboutCurrentUser(principal.getName());
-        if (subscriber.isEmpty()){
+        if (subscriber.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Optional<User> userToUnsubscribe = userService.getUserById(id);
-        if (userToUnsubscribe.isEmpty()){
+        if (userToUnsubscribe.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        if (subscriber.get().getId().equals(id)){
+        if (subscriber.get().getId().equals(id)) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(userService.unsubscribe(principal, id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);
@@ -121,13 +121,13 @@ public class UserController {
     @PutMapping("/update")
     @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<HttpStatus> updateCurrentUser(@RequestBody @Valid UpdateUserDto updateUserDto,
-                                                 BindingResult bindingResult, Principal principal) {
+                                                        BindingResult bindingResult, Principal principal) {
         log.info("start method updateUser in UserController");
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }
         Optional<User> userToUpdate = userService.getInfoAboutCurrentUser(principal.getName());
-        if (userToUpdate.isEmpty()){
+        if (userToUpdate.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(userService.updateCurrentUser(updateUserDto, principal)
@@ -139,11 +139,11 @@ public class UserController {
     public ResponseEntity<HttpStatus> changeUserToAdmin(@PathVariable("id") Long id, Principal principal) {
         log.info("start method changeUserToAdmin in UserController");
         Optional<User> admin = userService.getInfoAboutCurrentUser(principal.getName());
-        if (admin.isEmpty()){
+        if (admin.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Optional<User> userToChange = userService.getUserById(id);
-        if (userToChange.isEmpty()){
+        if (userToChange.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(userService.changeUserToAdmin(id) ? HttpStatus.NO_CONTENT : HttpStatus.CONFLICT);

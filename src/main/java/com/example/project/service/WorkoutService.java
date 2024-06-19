@@ -35,7 +35,7 @@ public class WorkoutService {
 
     public Boolean deleteWorkoutById(Long id) {
         Optional<Workout> workoutCheck = getWorkoutById(id);
-        if (workoutCheck.isEmpty()){
+        if (workoutCheck.isEmpty()) {
             return false;
         }
         workoutRepository.deleteById(id);
@@ -47,7 +47,7 @@ public class WorkoutService {
         newWorkout.setWorkoutType(workout.getWorkoutType());
         newWorkout.setWorkoutDistance(workout.getWorkoutDistance());
         newWorkout.setWorkoutTime(workout.getWorkoutTime());
-        if(userRepository.existsById(workout.getUserId())) {
+        if (userRepository.existsById(workout.getUserId())) {
             newWorkout.setUserId(workout.getUserId());
         } else {
             return false;
@@ -60,15 +60,15 @@ public class WorkoutService {
 
     public Boolean updateWorkout(Workout workout) {
         Optional<Workout> workoutFromDBOptional = workoutRepository.findById(workout.getId());
-        if (workoutFromDBOptional.isPresent()){
+        if (workoutFromDBOptional.isPresent()) {
             Workout workoutFromDB = workoutFromDBOptional.get();
             if (workoutFromDB.getWorkoutType() != null) {
                 workoutFromDB.setWorkoutType(workout.getWorkoutType());
             } else return false;
-            if (workoutFromDB.getWorkoutTime() != null){
+            if (workoutFromDB.getWorkoutTime() != null) {
                 workoutFromDB.setWorkoutTime(workout.getWorkoutTime());
             } else return false;
-            if (workoutFromDB.getWorkoutDistance() != null){
+            if (workoutFromDB.getWorkoutDistance() != null) {
                 workoutFromDB.setWorkoutDistance(workout.getWorkoutDistance());
             } else return false;
             if (userRepository.existsById(workout.getUserId())) {
@@ -83,16 +83,16 @@ public class WorkoutService {
 
     public Boolean addWorkoutFromUser(Long userId, AddWorkoutDto addWorkoutDto) {
         Optional<User> userFromDBOptional = userRepository.findById(userId);
-        if (userFromDBOptional.isEmpty()){
+        if (userFromDBOptional.isEmpty()) {
             return false;
         }
         Workout newWorkout = new Workout();
         newWorkout.setWorkoutType(addWorkoutDto.getWorkoutType());
-        if(addWorkoutDto.getWorkoutDistance() < 0){
+        if (addWorkoutDto.getWorkoutDistance() < 0) {
             return false;
         }
         newWorkout.setWorkoutDistance(addWorkoutDto.getWorkoutDistance());
-        if(addWorkoutDto.getWorkoutTime() < 0){
+        if (addWorkoutDto.getWorkoutTime() < 0) {
             return false;
         }
         newWorkout.setWorkoutTime(addWorkoutDto.getWorkoutTime());

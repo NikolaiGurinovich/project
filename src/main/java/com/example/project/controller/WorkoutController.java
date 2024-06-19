@@ -81,11 +81,11 @@ public class WorkoutController {
     public ResponseEntity<HttpStatus> addWorkout(@RequestBody @Valid AddWorkoutDto addWorkoutDto, Principal principal) {
         log.info("start addWorkout in WorkoutController");
         Optional<User> user = userService.getInfoAboutCurrentUser(principal.getName());
-        if (user.isEmpty()){
+        if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(workoutService.addWorkoutFromUser(user.get().getId(), addWorkoutDto)
-                ? HttpStatus.CREATED : HttpStatus.CONFLICT );
+                ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 
     @PostMapping("/like/{id}")
@@ -93,12 +93,12 @@ public class WorkoutController {
     public ResponseEntity<HttpStatus> likeWorkout(@PathVariable("id") Long id, Principal principal) {
         log.info("start likeWorkout in WorkoutController");
         Optional<User> user = userService.getInfoAboutCurrentUser(principal.getName());
-        if (user.isEmpty()){
+        if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        if (workoutService.getWorkoutById(id).isEmpty()){
+        if (workoutService.getWorkoutById(id).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(likesService.likeWorkout(id,user.get().getId()) ? HttpStatus.CREATED : HttpStatus.CONFLICT );
+        return new ResponseEntity<>(likesService.likeWorkout(id, user.get().getId()) ? HttpStatus.CREATED : HttpStatus.CONFLICT);
     }
 }

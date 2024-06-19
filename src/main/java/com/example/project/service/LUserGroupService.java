@@ -87,14 +87,14 @@ public class LUserGroupService {
             return false;
         }
         LinkUserGroup newLink = new LinkUserGroup();
-        if(userID != null) {
+        if (userID != null) {
             newLink.setUserId(userID);
         }
-        if(groupID != null) {
+        if (groupID != null) {
             newLink.setGroupId(groupID);
         }
         groupService.getGroupById(groupID).get().setNumberOfMembers(groupService.getGroupById(groupID).
-                    get().getNumberOfMembers() + 1);
+                get().getNumberOfMembers() + 1);
         LinkUserGroup savedLink = lUserGroupRepository.saveAndFlush(newLink);
         return getLinkById(savedLink.getId()).isPresent();
     }
@@ -104,7 +104,7 @@ public class LUserGroupService {
         if (lUserGroupRepository.existsAllByUserIdAndGroupId(userID, groupID)) {
             groupService.getGroupById(groupID).get().setNumberOfMembers(groupService.getGroupById(groupID).
                     get().getNumberOfMembers() - 1);
-           return deleteLinkById(lUserGroupRepository.findAllByUserIdAndGroupId(userID, groupID).get().getId());
+            return deleteLinkById(lUserGroupRepository.findAllByUserIdAndGroupId(userID, groupID).get().getId());
         }
         return false;
     }
@@ -112,7 +112,7 @@ public class LUserGroupService {
     @Transactional
     public Boolean deleteUserFromMyGroup(Long userID, Long groupID, Long groupAdminId) {
         if (checkTable(userID, groupID)) {
-            if(groupAdminId.equals(groupService.getGroupById(groupID).get().getGroupAdminID())){
+            if (groupAdminId.equals(groupService.getGroupById(groupID).get().getGroupAdminID())) {
                 groupService.getGroupById(groupID).get().setNumberOfMembers(groupService.getGroupById(groupID).
                         get().getNumberOfMembers() - 1);
                 return deleteLinkById(lUserGroupRepository.findAllByUserIdAndGroupId(userID, groupID).get().getId());
@@ -125,9 +125,9 @@ public class LUserGroupService {
     @Transactional
     public Boolean deleteUserFromGroup(Long userID, Long groupID) {
         if (checkTable(userID, groupID)) {
-                groupService.getGroupById(groupID).get().setNumberOfMembers(groupService.getGroupById(groupID).
-                        get().getNumberOfMembers() - 1);
-                return deleteLinkById(lUserGroupRepository.findAllByUserIdAndGroupId(userID, groupID).get().getId());
+            groupService.getGroupById(groupID).get().setNumberOfMembers(groupService.getGroupById(groupID).
+                    get().getNumberOfMembers() - 1);
+            return deleteLinkById(lUserGroupRepository.findAllByUserIdAndGroupId(userID, groupID).get().getId());
         }
         return false;
     }

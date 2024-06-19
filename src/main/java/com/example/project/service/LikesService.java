@@ -53,10 +53,10 @@ public class LikesService {
             if (likesRepository.existsAllByUserIdAndWorkoutId(like.getUserId(), like.getWorkoutId())) {
                 return false;
             }
-            if (like.getUserId() != null){
+            if (like.getUserId() != null) {
                 likeFromDB.setUserId(like.getUserId());
             } else return false;
-            if (like.getWorkoutId() != null){
+            if (like.getWorkoutId() != null) {
                 likeFromDB.setWorkoutId(like.getWorkoutId());
             } else return false;
             Likes updatedLike = likesRepository.saveAndFlush(likeFromDB);
@@ -65,15 +65,15 @@ public class LikesService {
         return false;
     }
 
-    public Boolean likeWorkout(Long workoutId, Long userId ) {
+    public Boolean likeWorkout(Long workoutId, Long userId) {
         if (likesRepository.existsAllByUserIdAndWorkoutId(userId, workoutId)) {
             return false;
         }
         Likes likes = new Likes();
-        if(workoutId != null){
+        if (workoutId != null) {
             likes.setWorkoutId(workoutId);
         } else return false;
-        if(userId != null){
+        if (userId != null) {
             likes.setUserId(userId);
         } else return false;
         Likes savedLikes = likesRepository.save(likes);

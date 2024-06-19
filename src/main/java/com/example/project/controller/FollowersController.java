@@ -66,11 +66,11 @@ public class FollowersController {
     }
 
     private boolean checkBody(@RequestBody Followers followers) {
-        if(userService.getUserById(followers.getUserId()).isEmpty()){
+        if (userService.getUserById(followers.getUserId()).isEmpty()) {
             log.error("user not found");
             return true;
         }
-        if(userService.getUserById(followers.getSubUserId()).isEmpty()){
+        if (userService.getUserById(followers.getSubUserId()).isEmpty()) {
             log.error("sub user not found");
             return true;
         }

@@ -36,7 +36,7 @@ public class JwtUtils {
         } catch (JwtException e) {
             log.info("Jwt exception" + e);
         }
-            return false;
+        return false;
     }
 
     public Optional<String> getLoginFromJwtToken(String token) {

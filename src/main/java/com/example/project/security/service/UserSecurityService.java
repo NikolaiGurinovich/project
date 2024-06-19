@@ -34,13 +34,13 @@ public class UserSecurityService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void registration(RegistrationDto registrationDto){
+    public void registration(RegistrationDto registrationDto) {
         Optional<SecurityUser> security = userSecurityRepository.findByUserLogin(registrationDto.getLogin());
-        if (security.isPresent()){
+        if (security.isPresent()) {
             throw new UserAlreadyExists(registrationDto.getLogin());
         }
         User user = new User();
-        if(!registrationDto.getUserName().isBlank()){
+        if (!registrationDto.getUserName().isBlank()) {
             user.setUserName(registrationDto.getUserName());
         }
         user.setUserAge(registrationDto.getUserAge());
@@ -58,10 +58,10 @@ public class UserSecurityService {
         userSecurityRepository.save(securityUser);
     }
 
-    public Optional<String> generateToken(AuthRequestDto authRequestDto){
+    public Optional<String> generateToken(AuthRequestDto authRequestDto) {
         Optional<SecurityUser> security = userSecurityRepository.findByUserLogin(authRequestDto.getLogin());
         if (security.isPresent()
-                && passwordEncoder.matches(authRequestDto.getPassword(), security.get().getPassword())){
+                && passwordEncoder.matches(authRequestDto.getPassword(), security.get().getPassword())) {
             return Optional.of(jwtUtils.generateJwtToken(authRequestDto.getLogin()));
         }
         return Optional.empty();

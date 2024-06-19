@@ -41,7 +41,7 @@ public class UserService {
 
     public Boolean deleteUserById(Long id) {
         Optional<User> userCheck = getUserById(id);
-        if (userCheck.isEmpty()){
+        if (userCheck.isEmpty()) {
             return false;
         }
         userRepository.deleteById(id);
@@ -62,12 +62,12 @@ public class UserService {
 
     public Boolean updateUser(User user) {
         Optional<User> userFromDBOptional = userRepository.findById(user.getId());
-        if (userFromDBOptional.isPresent()){
+        if (userFromDBOptional.isPresent()) {
             User userFromDB = userFromDBOptional.get();
             if (user.getUserName() != null) {
                 userFromDB.setUserName(user.getUserName());
             }
-            if (user.getUserAge() != null){
+            if (user.getUserAge() != null) {
                 userFromDB.setUserAge(user.getUserAge());
             }
             userFromDB.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
@@ -77,9 +77,9 @@ public class UserService {
         return false;
     }
 
-    public Optional<User> getInfoAboutCurrentUser(String userName){
+    public Optional<User> getInfoAboutCurrentUser(String userName) {
         Optional<SecurityUser> userSecurity = userSecurityRepository.findByUserLogin(userName);
-        if (userSecurity.isEmpty()){
+        if (userSecurity.isEmpty()) {
             return Optional.empty();
         }
         return userRepository.findById(userSecurity.get().getUserId());
@@ -87,11 +87,11 @@ public class UserService {
 
     public Boolean subscribe(Principal principal, Long id) {
         Optional<SecurityUser> userSecurity = userSecurityRepository.findByUserLogin(principal.getName());
-        if (userSecurity.isEmpty()){
+        if (userSecurity.isEmpty()) {
             return false;
         }
         Followers follow = new Followers();
-        if (followersRepository.existsAllByUserIdAndSubUserId(id, userSecurity.get().getUserId())){
+        if (followersRepository.existsAllByUserIdAndSubUserId(id, userSecurity.get().getUserId())) {
             return false;
         }
         follow.setUserId(id);
@@ -100,9 +100,9 @@ public class UserService {
         return followersRepository.existsById(savedFollow.getId());
     }
 
-    public Boolean changeUserToAdmin (Long id) {
+    public Boolean changeUserToAdmin(Long id) {
         Optional<User> userCheck = getUserById(id);
-        if (userCheck.isEmpty()){
+        if (userCheck.isEmpty()) {
             return false;
         }
         SecurityUser securityUser = userSecurityRepository.findByUserId(id).get();
@@ -113,14 +113,14 @@ public class UserService {
 
     public Boolean unsubscribe(Principal principal, Long id) {
         Optional<SecurityUser> userSecurity = userSecurityRepository.findByUserLogin(principal.getName());
-        if (userSecurity.isEmpty()){
+        if (userSecurity.isEmpty()) {
             return false;
         }
-        if (!followersRepository.existsAllByUserIdAndSubUserId(id, userSecurity.get().getUserId())){
+        if (!followersRepository.existsAllByUserIdAndSubUserId(id, userSecurity.get().getUserId())) {
             return false;
         }
         Optional<Followers> followers = followersRepository.findAllByUserIdAndSubUserId(id, userSecurity.get().getUserId());
-        if (followers.isEmpty()){
+        if (followers.isEmpty()) {
             return false;
         }
         followersRepository.delete(followers.get());
@@ -129,20 +129,20 @@ public class UserService {
 
     public Boolean updateCurrentUser(UpdateUserDto updateUserDto, Principal principal) {
         Optional<User> user = getInfoAboutCurrentUser(principal.getName());
-        if (user.isEmpty()){
+        if (user.isEmpty()) {
             return false;
         }
         User userToUpdate = user.get();
-        if(updateUserDto.getUserName() != null){
+        if (updateUserDto.getUserName() != null) {
             userToUpdate.setUserName(updateUserDto.getUserName());
         }
-        if(updateUserDto.getUserAge() != null){
+        if (updateUserDto.getUserAge() != null) {
             userToUpdate.setUserAge(updateUserDto.getUserAge());
         }
-        if(updateUserDto.getUserWeight() != null){
+        if (updateUserDto.getUserWeight() != null) {
             userToUpdate.setUserWeight(updateUserDto.getUserWeight());
         }
-        if(updateUserDto.getGender() != null){
+        if (updateUserDto.getGender() != null) {
             userToUpdate.setGender(updateUserDto.getGender());
         }
         userToUpdate.setUpdated(Timestamp.valueOf(LocalDateTime.now()));
