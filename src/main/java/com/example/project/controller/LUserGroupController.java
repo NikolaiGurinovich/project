@@ -54,6 +54,7 @@ public class LUserGroupController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createLink(@RequestBody @Valid LinkUserGroup linkUserGroup,
                                                  BindingResult bindingResult) {
+        log.info("start method createLink from LUserGroupController");
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }

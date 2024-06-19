@@ -53,6 +53,7 @@ public class LikesController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createLike(@RequestBody @Valid Likes like, BindingResult bindingResult) {
+        log.info("start createLike from LikesController");
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }

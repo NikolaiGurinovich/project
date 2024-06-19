@@ -38,6 +38,7 @@ public class GroupController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Group>> getAllGroups() {
+        log.info("Start method getAllGroups in GroupController");
         return new ResponseEntity<>(groupService.getAllGroups(), HttpStatus.OK);
     }
 
@@ -55,6 +56,7 @@ public class GroupController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createGroup(@RequestBody @Valid Group group, BindingResult bindingResult) {
+        log.info("start method createGroup in GroupController");
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }
@@ -105,6 +107,7 @@ public class GroupController {
     public ResponseEntity<HttpStatus> updateMyGroupName(@PathVariable("id") Long id,
                                                         @RequestBody @Valid CreateGroupByUserDto createGroupByUserDto,
                                                         BindingResult bindingResult, Principal principal) {
+        log.info("start method updateMyGroupName in GroupController");
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }
@@ -151,7 +154,7 @@ public class GroupController {
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('GROUP_ADMIN')")
     public ResponseEntity<HttpStatus> deleteGroupByGroupAdmin(@PathVariable("id") Long id, Principal principal) {
-        log.info("start method deleteGroup in GroupController");
+        log.info("start method deleteGroupByGroupAdmin in GroupController");
         if (checkBody(principal, id)) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(groupService.deleteGroupByGroupAdmin(id,
                 userService.getInfoAboutCurrentUser(principal.getName()).get().getId())

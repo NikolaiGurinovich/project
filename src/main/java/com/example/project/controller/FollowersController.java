@@ -50,6 +50,7 @@ public class FollowersController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createFollow(@RequestBody @Valid Followers followers, BindingResult bindingResult) {
+        log.info("start createFollow from FollowersController");
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }

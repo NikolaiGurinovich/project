@@ -56,6 +56,7 @@ public class WorkoutController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createWorkout(@RequestBody @Valid Workout workout, BindingResult bindingResult) {
+        log.info("start createWorkout in WorkoutController");
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }

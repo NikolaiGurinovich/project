@@ -49,6 +49,7 @@ public class UserController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<HttpStatus> createUser(@RequestBody @Valid User user, BindingResult bindingResult) {
+        log.info("start method createUser in UserController");
         if (bindingResult.hasErrors()) {
             log.error(bindingResult.getFieldError().getDefaultMessage());
         }
@@ -75,6 +76,7 @@ public class UserController {
     @GetMapping("/info")
     @PreAuthorize("hasAnyRole('ADMIN','USER','GROUP_ADMIN')")
     public ResponseEntity<User> getInfoAboutCurrentUser(Principal principal) {
+        log.info("start method getInfoAboutCurrentUser in UserController");
         Optional<User> result = userService.getInfoAboutCurrentUser(principal.getName());
         if (result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
